@@ -6,8 +6,8 @@
 !share/
 share/*
 !share/purpose.txt
+.ddev/traefik/
 
-data-imports
 drush/contrib/
 vendor
 web/core/
