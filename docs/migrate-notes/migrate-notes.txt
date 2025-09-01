@@ -1,7 +1,7 @@
 
 
-ddev drush php-eval "var_dump(Drupal::keyValue('migrate_status')->set('bees_import', 0));"
+ddev drush php-eval "var_dump(Drupal::keyValue('migrate_status')->set('taxonomy_importer_myriatrix_xls_reduced_(gsheet)', 0));"
 
-ddev drush migrate:import bees_import
+ddev drush migrate:import taxonomy_importer_myriatrix_xls_reduced_(gsheet)
 
-ddev drush migrate:rollback bees_import
+ddev drush migrate:rollback taxonomy_importer_myriatrix_xls_reduced_(gsheet)
