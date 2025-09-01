@@ -1,4 +1,4 @@
-name: anthophila-dev
+name: myriatrix-dev
 type: drupal10
 docroot: web
 php_version: "8.1"
