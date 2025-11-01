@@ -1,3 +1,4 @@
+uuid: fadbac5f-6fa7-44c4-947d-b9c878e7e69b
 langcode: en
 status: true
 dependencies:
@@ -16,5 +17,6 @@ required: false
 translatable: false
 default_value: {  }
 default_value_callback: ''
-settings: {  }
+settings:
+  allowed_formats: {  }
 field_type: text

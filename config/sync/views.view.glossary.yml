@@ -1,3 +1,4 @@
+uuid: 2f2647b4-33fb-4a5f-8a99-4512328376d6
 langcode: en
 status: false
 dependencies:
@@ -180,6 +181,15 @@ display:
             date_format: long
             custom_date_format: ''
             timezone: ''
+            tooltip:
+              date_format: ''
+              custom_date_format: ''
+            time_diff:
+              enabled: false
+              future_format: '@interval hence'
+              past_format: '@interval ago'
+              granularity: 2
+              refresh: 60
       pager:
         type: mini
         options:
