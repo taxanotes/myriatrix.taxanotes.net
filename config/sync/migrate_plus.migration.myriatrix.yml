@@ -26,7 +26,7 @@ source:
       label: 'Term description'
     -
       name: guid
-      label: GUID
+      label: 'GUID'
     -
       name: parent_guid
       label: 'Parent GUID'

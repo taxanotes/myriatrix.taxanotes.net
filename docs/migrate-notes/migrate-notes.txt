@@ -5,3 +5,12 @@ ddev drush php-eval "var_dump(Drupal::keyValue('migrate_status')->set('taxonomy_
 ddev drush migrate:import taxonomy_importer_myriatrix_xls_reduced_(gsheet)
 
 ddev drush migrate:rollback taxonomy_importer_myriatrix_xls_reduced_(gsheet)
+
+
+--
+
+
+ddev drush migrate:import myriatrix
+
+ddev drush migrate:rollback myriatrix
+- where "myriatrix" is the `id:` in: config/sync/migrate_plus.migration.myriatrix.yml
