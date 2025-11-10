@@ -14,7 +14,7 @@ source:
   path: ../data-imports/myriatrix.csv
   delimiter: ','
   enclosure: '"'
-  header_offset: 2
+  header_offset: 0
   ids:
     - term_name
   fields:
@@ -47,4 +47,5 @@ process:
   field_parent_guid: parent_guid
 destination:
   plugin: 'entity:node'
+idMap: {  }
 migration_dependencies: {  }

@@ -1,0 +1,51 @@
+uuid: b637278d-3ba1-4761-9a6b-3041c3305679
+langcode: en
+status: true
+dependencies: {  }
+id: myriatrix_sample
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags: {  }
+migration_group: null
+label: 'Import myriatrix data'
+source:
+  plugin: csv
+  path: ../data-imports/myriatrix-sample.csv
+  delimiter: ','
+  enclosure: '"'
+  header_offset: 0
+  ids:
+    - term_name
+  fields:
+    -
+      name: term_name
+      label: 'Term name'
+    -
+      name: parent_term_name
+      label: 'Parent Term Name'
+    -
+      name: term_description
+      label: 'Term description'
+    -
+      name: term_guid
+      label: 'Term GUID'
+    -
+      name: parent_guid
+      label: 'Parent GUID'
+process:
+  title: term_name
+  uid:
+    plugin: default_value
+    default_value: 1
+  type:
+    plugin: default_value
+    default_value: taxon
+  field_parent_term_name: parent_term_name
+  field_term_description: term_description
+  field_guid: term_guid
+  field_parent_guid: parent_guid
+destination:
+  plugin: 'entity:node'
+idMap: {  }
+migration_dependencies: {  }
