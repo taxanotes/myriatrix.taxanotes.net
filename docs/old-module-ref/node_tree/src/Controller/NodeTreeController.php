@@ -50,6 +50,10 @@ class NodeTreeController extends ControllerBase {
   }
 
 
+  
+
+
+
 
   /**
    * 
@@ -121,6 +125,24 @@ class NodeTreeController extends ControllerBase {
     }
     
     return $child_node_ids_array;
+
+    //$jsonString = json_encode($child_node_ids_array);
+
+    // I was doing it twice
+    // https://stackoverflow.com/a/57738071/227926
+
+    // TODO: why is this not a json response?
+    // answer: because there is a wrapper function that calls this function and wraps the response in JSON
+    //return $child_node_ids_array;
+
+
+    //return new JsonResponse($this->getImmediatechildrenOfParent());
+
+    //return new JsonResponse($child_node_ids_array);
+
+    // e.g. https://taxanotes.ddev.site/node_tree/api/getImmediateChildrenOfParent?parentid=104548
+    // returned:
+    // {"data":"[104575,104576,104577,104578]","method":"GET"}
   }
 
   /**
@@ -216,10 +238,17 @@ class NodeTreeController extends ControllerBase {
 
     $childNode = null;
     $this->getNodeFromUuid( $childUuid, $childNode );
+    /*
+    $nodeQueryAsArray = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties([
+      'type' => 'node_tree',
+      'field_taxon_key' => $taxonkey,
+    ]);
+    */
+ 
     // should be just one node, but we get back an array to iterate through in any case
 
     // only expect one element array, because taxon key should be unique
-    // foreach ($nodeQueryAsArray as $nid => $node) {
+   // foreach ($nodeQueryAsArray as $nid => $node) {
       # https://drupal.stackexchange.com/questions/144947/how-do-i-access-a-field-value-for-an-entity-e-g-node-object
 
     if ( $childNode ) {
@@ -286,3 +315,102 @@ class NodeTreeController extends ControllerBase {
     }
   }
 }
+
+
+
+
+/*
+
+[
+    {
+        "name": "speciesname",
+        "id": 104575,
+        "load_on_demand": true
+    },
+    {
+        "name": "speciesname",
+        "id": 104576,
+        "load_on_demand": true
+    },
+    {
+        "name": "speciesname",
+        "id": 104577,
+        "load_on_demand": true
+    },
+    {
+        "name": "speciesname",
+        "id": 104578,
+        "load_on_demand": true
+    }
+]
+
+https://www.simonholywell.com/post/2016/11/quick-way-to-create-php-stdclass/
+
+$x = (object) [
+    'a' => 'test',
+    'b' => 'test2',
+    'c' => 'test3'
+];
+
+
+*/
+
+
+
+/*
+
+
+[
+  {
+    "id": "value8",
+    "name": "value9",
+    "is_open": true,
+    "is_loading": false,
+    "children": [
+      { "id": "value6", "name": "speciesname6" },
+      {
+        "id": "value7",
+        "name": "Bacteria",
+        "is_open": true,
+        "is_loading": false,
+        "children": [
+          { "id": "value1", "name": "speciesname1" },
+          { "id": "value2", "name": "speciesname2" },
+          { "id": "value3", "name": "speciesname3" },
+          { "id": "value4", "name": "speciesname4" }
+        ]
+      },
+      { "id": "value5", "name": "speciesname5" }
+    ]
+  }
+]
+
+
+
+[
+    {
+        "id": "guidvalue1",
+        "name": "speciesname1",
+        "children": [
+            {
+                "id": "value2",
+                "name": "speciesname2",
+                "children": [
+                    {
+                        "id": "value3",
+                        "name": "speciesname3",
+                        "children": [
+                            {
+                                "id": "value4",
+                                "name": "speciesname4"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
+
+
+*/
