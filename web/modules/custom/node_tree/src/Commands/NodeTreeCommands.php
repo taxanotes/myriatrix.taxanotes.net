@@ -5,6 +5,7 @@ namespace Drupal\node_tree\Commands;
 use Drush\Commands\DrushCommands; 
 use Drupal\Component\Serialization\Json;
 use Drupal\views\Views;
+use Drupal\views\ViewExecutable;
 use Drupal\node\Entity\Node;
 
 // THIS:
@@ -18,6 +19,8 @@ use Drupal\node\Entity\Node;
      - parent identifier value in field in that child node
      - ability to look up parent node based on that value
         - Drupal view?
+          - View: node_tree_all
+            - Display: node_tree_all
 */
 
 /**
@@ -66,12 +69,14 @@ class NodeTreeCommands extends DrushCommands {
     foreach ($view->result as $rid => $row) {
 
       // $row is https://api.drupal.org/api/drupal/core%21modules%21views%21src%21ResultRow.php/class/ResultRow/9.3.x
+      // https://api.drupal.org/api/drupal/core%21modules%21views%21src%21ResultRow.php/class/ResultRow/11.x
 
       $child_node_id = $row->nid;
 
       // https://drupal.stackexchange.com/questions/274462/how-to-get-a-rendered-output-field-from-view-object-programatically
       //$field__id_parent_value = $row->field__id_parent;
-      $field_parent_guid_value = $row->_entity->get('field_parent_guid')->getValue()[0]['value'];
+      $row_entity = $row->_entity;
+      $field_parent_guid_value = $$row_entity->get('field_parent_guid')->getValue()[0]['value'];
 
       // https://drupal.stackexchange.com/q/308755/1082
       // https://api.drupal.org/api/drupal/core%21modules%21views%21src%21Plugin%21views%21field%21FieldPluginBase.php/class/FieldPluginBase/8.2.x
@@ -141,20 +146,72 @@ class NodeTreeCommands extends DrushCommands {
     $view = \Drupal\views\Views::getView('node_tree');
     $view->setDisplay('node_tree_all');
     $view->execute();
+    // https://gemini.google.com/share/2679636c6c8b
     $view_result = $view->result;
     var_dump( $view_result );
   }
 
   // works:
   private function _output_views_count_test() {
+    /*
     $view = \Drupal\views\Views::getView('node_tree');
     $view->setDisplay('node_tree_all');
     $view->execute();
 
     // credit: https://www.drupal.org/project/drupal/issues/2797565
-    $total_num_rows = $view->query->query()->countQuery()->execute()->fetchField();
+    $view_query = $view->query;
+    $total_num_rows = $view_query->countQuery()->execute()->fetchField();
 
     var_dump( $total_num_rows );
+    */
+
+
+
+// 1. Get the view executable object.
+/** @var \Drupal\views\ViewExecutable $view */
+$view = Views::getView('node_tree');
+
+if ($view instanceof ViewExecutable) {
+    // 2. Set the display.
+    $view->setDisplay('node_tree_all');
+    
+    // 3. Build the view (prepares the query object).
+    $view->build(); 
+
+    // 4. Get the total row count using the countQuery() method on the built query.
+    // The query object is available at $view->query after $view->build().
+    // We get the internal query object first, which is an instance of 
+    // \Drupal\Core\Database\Query\Select, and then call countQuery().
+    // The query() method on the Views query plugin is necessary to get the 
+    // underlying SelectInterface object.
+    // https://gemini.google.com/share/2679636c6c8b
+    $total_num_rows = $view->query->query()->countQuery()->execute()->fetchField();
+} else {
+    $total_num_rows = 0; // Handle case where view doesn't exist
+}
+
+// 1. Get the view executable object.
+/** @var \Drupal\views\ViewExecutable $view */
+$view = Views::getView('node_tree');
+
+if ($view instanceof ViewExecutable) {
+    // 2. Set the display.
+    $view->setDisplay('node_tree_all');
+    
+    // 3. Build the view (prepares the query object).
+    $view->build(); 
+
+    // 4. Get the total row count using the countQuery() method on the built query.
+    // The query object is available at $view->query after $view->build().
+    // We get the internal query object first, which is an instance of 
+    // \Drupal\Core\Database\Query\Select, and then call countQuery().
+    // The query() method on the Views query plugin is necessary to get the 
+    // underlying SelectInterface object.
+    // https://gemini.google.com/share/2679636c6c8b
+    $total_num_rows = $view->query->query()->countQuery()->execute()->fetchField();
+} else {
+    $total_num_rows = 0; // Handle case where view doesn't exist
+}
   }
 
   // works:

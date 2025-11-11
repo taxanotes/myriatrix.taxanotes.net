@@ -41,8 +41,15 @@ class NodeTreeController extends ControllerBase {
     //
     $entity_type = 'node';
     $view_mode = 'full';  
-    $nodeHtml = (render(\Drupal::entityTypeManager()->getViewBuilder($entity_type)->view($node, $view_mode)))->__toString();
-
+    
+    //https://www.drupal.org/node/2939099
+    //$nodeHtml = (render(\Drupal::entityTypeManager()->getViewBuilder($entity_type)->view($node, $view_mode)))->__toString();
+    //
+    // now becomes:
+    $build = \Drupal::entityTypeManager()->getViewBuilder($entity_type)->view($node, $view_mode);
+    $output = \Drupal::service('renderer')->render($build);
+    $nodeHtml = $output->__toString();
+    
     return new JsonResponse([
       'data' => $nodeHtml,
       'method' => 'GET',
