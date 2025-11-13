@@ -87,11 +87,12 @@ class NodeTreeCommands extends DrushCommands {
     }
   }
 
+  // GUID
   private function _set_entity_reference_to_parent_node_from_child_node($child_node_id, $parent_value) {
     $parent_node_id = $this->_get_parent_node_id($parent_value);
 
     $node = Node::load($child_node_id);
-    $node->set('field_parent_node_tree', ['target_id' => $parent_node_id]);
+    $node->set('field_parent_taxon_reference', ['target_id' => $parent_node_id]);
     $node->save();
   }
 
@@ -284,7 +285,7 @@ if ($view instanceof ViewExecutable) {
 
     $child_node_id = 104584;
     $node = Node::load($child_node_id);
-    $node->set('field_parent_node_tree', ['target_id' => $parent_id]);
+    $node->set('field_parent_taxon_reference', ['target_id' => $parent_id]);
     $node->save();
 
   }
@@ -325,7 +326,7 @@ if ($view instanceof ViewExecutable) {
 
     $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties([
       'type' => 'node_tree',
-      'field_parent_node_tree' => $parent_id,
+      'field_parent_taxon_reference' => $parent_id,
     ]);
 
     var_dump($nodes);
