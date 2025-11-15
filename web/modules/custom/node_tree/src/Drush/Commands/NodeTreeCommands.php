@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\node_tree\Commands;
+namespace Drupal\node_tree\Drush\Commands;
 
 use Drush\Commands\DrushCommands; 
 use Drupal\Component\Serialization\Json;
@@ -40,6 +40,7 @@ class NodeTreeCommands extends DrushCommands {
    *   
    */
 
+  // https://mglaman.dev/blog/writing-drush-commands-php-attributes#:%7E:text=For%20Drush%2C%20this%20allows%20specifying,more%20without%20writing%20PHP%20code.&text=Our%20command%20and%20alias%20annotations,and%20wrapped%20in%20brackets%20%5B%5D%20.
 
   /**
    * Gets node_tree data using input CSV for calling parameters (from UKSI)
@@ -77,7 +78,7 @@ class NodeTreeCommands extends DrushCommands {
       //$field__id_parent_value = $row->field__id_parent;
       $row_entity = $row->_entity;
       //$field_parent_guid_value = $$row_entity->get('field_parent_guid')->getValue()[0]['value'];
-      $field_parent_guid_value = $$row_entity->get('field_parent_guid')->getValue()[0]['value'];
+      $field_parent_guid_value = $row_entity->get('field_parent_guid')->getValue()[0]['value'];
 
       // https://drupal.stackexchange.com/q/308755/1082
       // https://api.drupal.org/api/drupal/core%21modules%21views%21src%21Plugin%21views%21field%21FieldPluginBase.php/class/FieldPluginBase/8.2.x

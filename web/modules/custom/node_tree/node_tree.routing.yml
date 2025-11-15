@@ -9,7 +9,7 @@ node_tree.json_node_tree_api:
 node_tree.api_node_tree_content_display:
   path: '/node_tree/api/getNodeTreeContent/{uuid}'
   defaults:
-    _controller: 'Drupal\node_tree\Controller\NodeTreeController::responseForGetContent'
+    _controller: 'Drupal\node_tree\Controller\NodeTreeController::responseForGetNodeContent'
     _title: 'node_tree API get node_tree content'
     uuid: ''
   requirements:
