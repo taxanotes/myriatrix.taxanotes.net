@@ -76,6 +76,7 @@ class NodeTreeCommands extends DrushCommands {
       // https://drupal.stackexchange.com/questions/274462/how-to-get-a-rendered-output-field-from-view-object-programatically
       //$field__id_parent_value = $row->field__id_parent;
       $row_entity = $row->_entity;
+      //$field_parent_guid_value = $$row_entity->get('field_parent_guid')->getValue()[0]['value'];
       $field_parent_guid_value = $$row_entity->get('field_parent_guid')->getValue()[0]['value'];
 
       // https://drupal.stackexchange.com/q/308755/1082
