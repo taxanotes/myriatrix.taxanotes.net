@@ -357,4 +357,9 @@ if ($view instanceof ViewExecutable) {
 } // end class
 
 
-
+// https://api.drupal.org/api/drupal/core%21modules%21views%21src%21ViewExecutable.php/class/ViewExecutable/11.x
+// https://api.drupal.org/api/drupal/core%21modules%21views%21src%21ResultRow.php/class/ResultRow/11.x
+// https://api.drupal.org/api/drupal/core%21modules%21node%21src%21Entity%21Node.php/class/Node/11.x
+// https://drupal.stackexchange.com/questions/144947/how-do-i-access-a-field-value-for-an-entity-e-g-node-object
+// https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21FieldItemListInterface.php/interface/FieldItemListInterface/11.x
+// https://gemini.google.com/share/80a71b8151e8
