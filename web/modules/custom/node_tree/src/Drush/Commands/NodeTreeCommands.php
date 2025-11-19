@@ -78,14 +78,24 @@ class NodeTreeCommands extends DrushCommands {
       //$field__id_parent_value = $row->field__id_parent;
       $row_entity = $row->_entity;
       //$field_parent_guid_value = $$row_entity->get('field_parent_guid')->getValue()[0]['value'];
-      $field_parent_guid_value = $row_entity->get('field_parent_guid')->getValue()[0]['value'];
+      $field_obj = $row_entity->get('field_parent_guid');
+      if ( $field_obj ) {
+      //$field_parent_guid_value = $row_entity->get('field_parent_guid')->getValue()[0]['value'];
+        //$field_parent_guid_value = $field_obj->getValue()[0]['value'];
 
-      // https://drupal.stackexchange.com/q/308755/1082
+        //$field_parent_guid_value = $field_obj->getValue()[0]['value'];
+        $value_list = $field_obj->getValue(); // should be only one for childrem and empty for top node
+        if (count($value_list) > 0 ) {
+          $field_parent_guid_value = $value_list[0]['value'];
+          $this->_set_entity_reference_to_parent_node_from_child_node($child_node_id, $field_parent_guid_value);
+        }
+
+              // https://drupal.stackexchange.com/q/308755/1082
       // https://api.drupal.org/api/drupal/core%21modules%21views%21src%21Plugin%21views%21field%21FieldPluginBase.php/class/FieldPluginBase/8.2.x
       // https://api.drupal.org/api/drupal/core%21modules%21views%21src%21Plugin%21views%21field%21FieldPluginBase.php/8.2.x
-      // https://api.drupal.org/api/drupal/core%21modules%21views%21src%21ViewExecutable.php/property/ViewExecutable%3A%3Afield/9.3.x
-
-      $this->_set_entity_reference_to_parent_node_from_child_node($child_node_id, $field_parent_guid_value);
+      // httpßs://api.drupal.org/api/drupal/core%21modules%21views%21src%21ViewExecutable.php/property/ViewExecutable%3A%3Afield/9.3.x
+      }
+      
     }
   }
 
@@ -93,16 +103,18 @@ class NodeTreeCommands extends DrushCommands {
   private function _set_entity_reference_to_parent_node_from_child_node($child_node_id, $parent_value) {
     $parent_node_id = $this->_get_parent_node_id($parent_value);
 
-    $node = Node::load($child_node_id);
-    $node->set('field_parent_taxon_reference', ['target_id' => $parent_node_id]);
-    $node->save();
+    if ( $parent_node_id > 0 ) {
+      $node = Node::load($child_node_id);
+      $node->set('field_parent_taxon_reference', ['target_id' => $parent_node_id]);
+      $node->save();
+    }
   }
 
   // TO DO: need another view that returns a single result - node_tree_parent
-  private function _get_parent_node_id($parent_value) {
+  private function _get_parent_node_id($parent_guid_value_as_string) {
     $view = \Drupal\views\Views::getView('node_tree');
     $view->setDisplay('node_tree_parent');
-    $args = [$parent_value];
+    $args = [$parent_guid_value_as_string];
     $view->setArguments($args);
     $view->execute();
 
@@ -111,14 +123,18 @@ class NodeTreeCommands extends DrushCommands {
 
     // only expecting one result
     $parent_node_id = 0;
-    foreach ($view->result as $rid => $row) {
-      $parent_node_id = $row->nid;
+    if ($view->total_rows > 0) {
+      foreach ($view->result as $rid => $row) {
+        $parent_node_id = $row->nid;
+      }
     }
 
     return $parent_node_id;
   }
 
-
+  private function _isNullOrEmptyString(string|null $str){
+     return $str === null || trim($str) === '';
+  }
 
 
   /**********************************************************************************************************************************************************/
