@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Drupal\node\Entity\Node;
 const NODE_TREE_NODE_ROOT_UUID = ''; // TODO - fill value
+// but how do I deal with when I have multiple roots?
 
 /**
  * 
