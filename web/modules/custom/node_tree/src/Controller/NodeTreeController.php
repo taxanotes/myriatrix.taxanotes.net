@@ -5,7 +5,8 @@ namespace Drupal\node_tree\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Drupal\node\Entity\Node;
-const NODE_TREE_NODE_ROOT_UUID = ''; // TODO - fill value
+//const NODE_TREE_NODE_ROOT_UUID = ''; // TODO - fill value
+const NODE_TREE_NODE_ROOT_UUID = 'a'; // TODO - fill value
 // but how do I deal with when I have multiple roots?
 
 /**
@@ -64,29 +65,71 @@ class NodeTreeController extends ControllerBase {
    */
   // https://taxanotes.ddev.site/node_tree/api/getImmediateChildrenOfParent/?node=<value>
   // very subtle /?node= works but not ?node= without the preceding slash
-  public function getImmediatechildrenOfParent() {
+  //public function getImmediatechildrenOfParent() {
+  public function getImmediatechildrenOfParent($aNode) {
+
+    // https://gemini.google.com/share/c1a91d550221
+
+
+
+// 1. Get the Entity Query service.
+$query = \Drupal::entityQuery('node');
+
+// 2. Define the conditions:
+//    - Filter by content type (optional but recommended for performance/scope).
+//$query->condition('type', 'referencing_content_type');
+$query->condition('type', 'taxon');
+
+//    - Crucially, filter the entity reference field's target_id
+//      to match the ID of the node being referenced.
+$field_name = 'field_parent_guid';
+// https://gemini.google.com/share/efb010b3e331
+$target_nid = $aNode->id();
+$query->condition($field_name, $target_nid);
+
+// 3. Execute the query to get an array of NIDs (Node IDs).
+$referencing_nids = $query->execute();
+
+// 4. Load the full node objects (optional, but often needed).
+$referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($referencing_nids);
+
+// $referencing_nodes now contains all the nodes that reference the target node.
+
+
+      foreach ($referencing_nodes as $nid => $node) {
+        $guid = $node->get('guid')->getValue();
+        $childObj = (object) [
+          'name' => $node->label(),
+          'id' => $guid,
+          //'id' => $node->uuid(),
+          'load_on_demand' => true
+        ];
+        
+        $child_node_ids_array[] = $childObj;
+      }
+
+
     
-    /*
+    //https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21EntityReferenceFieldItemList.php/function/EntityReferenceFieldItemList%3A%3AreferencedEntities/11.x
 
-    $anArray = $aNode->referencedEntities();
+    //$anArray = $aNode->get('')->referencedEntities();
 
-    */
+    
     
     // parent node_tree node id
     //$parent_uuid = $aNode->id();
     // as per spec: https://mbraak.github.io/jqTree/examples/05_load_on_demand/
 
 
-    
+    /*
     $query = \Drupal::request()->query;
-
     $parent_uuid = $query->get('node');
 
     $child_node_ids_array = [];
     if ( !$this->IsNullOrEmptyString( $parent_uuid ) ) {
 
 
-
+  
       // https://drupal.stackexchange.com/a/280924/1082
 
       $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties([
@@ -127,6 +170,7 @@ class NodeTreeController extends ControllerBase {
 
       $child_node_ids_array[] = $childObj;
     }
+    */
     
     return $child_node_ids_array;
   }
