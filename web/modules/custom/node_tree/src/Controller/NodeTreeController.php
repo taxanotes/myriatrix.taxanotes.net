@@ -96,7 +96,7 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
 
 
       foreach ($referencing_nodes as $nid => $node) {
-        $guid = $node->get('guid')->getValue();
+        $guid = $node->get('field_guid')->getValue();
         $childObj = (object) [
           'name' => $node->label(),
           'id' => $guid,
@@ -342,7 +342,8 @@ if (!empty($nids)) {
 
           // wrong! field_taxon_key is not guid
           //$parentguid = $parentNode->get('field_taxon_key')->getValue()[0]['value'];
-          $parentguid = $parentNode->guid();
+          //$parentguid = $parentNode->guid();
+          $parentNode->get('field_guid')->getValue();
 
           $parentName = $parentNode->getTitle();
         }
