@@ -1,12 +1,13 @@
 <?php
 
 namespace Drupal\node_tree\Controller;
+use Drupal\Core\Entity\Query\QueryFactory;
 
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Drupal\node\Entity\Node;
-//const NODE_TREE_NODE_ROOT_UUID = ''; // TODO - fill value
-const NODE_TREE_NODE_ROOT_UUID = 'a'; // TODO - fill value
+//const NODE_TREE_NODE_ROOT_guid = ''; // TODO - fill value
+const NODE_TREE_NODE_ROOT_guid = 'a'; // TODO - fill value
 // but how do I deal with when I have multiple roots?
 
 /**
@@ -14,8 +15,6 @@ const NODE_TREE_NODE_ROOT_UUID = 'a'; // TODO - fill value
  * 
  */
 class NodeTreeController extends ControllerBase {
-
-  
   public function responseForImmediatechildrenOfParent() {
     return new JsonResponse($this->getImmediatechildrenOfParent());
   }
@@ -25,17 +24,17 @@ class NodeTreeController extends ControllerBase {
    * 
    * example:
    */
-  public function responseForGetNodeContent( $uuid ) {
+  public function responseForGetNodeContent( $guid ) {
     $node = null;
 
-    $uuidToUse = '';
-    if ( !$this->IsNullOrEmptyString($uuid) ) {
-      $uuidToUse = $uuid;
+    $guidToUse = '';
+    if ( !$this->IsNullOrEmptyString($guid) ) {
+      $guidToUse = $guid;
     }
     else {
-      $uuidToUse = NODE_TREE_NODE_ROOT_UUID;
+      $guidToUse = NODE_TREE_NODE_ROOT_guid;
     }
-    $this->getNodeFromUuid( $uuidToUse, $node );
+    $this->getNodeFromguid( $guidToUse, $node );
 
     // https://drupal.stackexchange.com/a/194368/1082
     // and
@@ -101,7 +100,7 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
         $childObj = (object) [
           'name' => $node->label(),
           'id' => $guid,
-          //'id' => $node->uuid(),
+          //'id' => $node->guid(),
           'load_on_demand' => true
         ];
         
@@ -117,16 +116,16 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
     
     
     // parent node_tree node id
-    //$parent_uuid = $aNode->id();
+    //$parent_guid = $aNode->id();
     // as per spec: https://mbraak.github.io/jqTree/examples/05_load_on_demand/
 
 
     /*
     $query = \Drupal::request()->query;
-    $parent_uuid = $query->get('node');
+    $parent_guid = $query->get('node');
 
     $child_node_ids_array = [];
-    if ( !$this->IsNullOrEmptyString( $parent_uuid ) ) {
+    if ( !$this->IsNullOrEmptyString( $parent_guid ) ) {
 
 
   
@@ -134,13 +133,13 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
 
       $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties([
        'type' => 'node_tree',
-       'field_parent_uuid' => $parent_uuid,
+       'field_parent_guid' => $parent_guid,
       ]);
 
       foreach ($nodes as $nid => $node) {
         $childObj = (object) [
           'name' => $node->label(),
-          'id' => $node->uuid(),
+          'id' => $node->guid(),
           'load_on_demand' => true
         ];
         
@@ -149,22 +148,22 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
     }
     else {
 
-      // the if-then needs to decide if a node uuid has been passed in or not, and if not, set one, as in the top level parent
+      // the if-then needs to decide if a node guid has been passed in or not, and if not, set one, as in the top level parent
       // then feed this into a query that gets the children
       //
       // might want to use IsNullOrEmptyString
       // and getNodeFromTaxonkey 
 
       $entity = null;
-      $rootTaxonKey = NODE_TREE_NODE_ROOT_UUID;
+      $rootTaxonKey = NODE_TREE_NODE_ROOT_guid;
 
-      $this->getNodeFromUuid( $rootTaxonKey, $entity );
+      $this->getNodeFromguid( $rootTaxonKey, $entity );
 
-      //$entity = \Drupal::service('entity.repository')->loadEntityByUuid('node', node_tree_NODE_ROOT_UUID);
+      //$entity = \Drupal::service('entity.repository')->loadEntityByguid('node', node_tree_NODE_ROOT_guid);
       $name = $entity->getTitle();
       $childObj = (object) [
         'name' => $name,
-        'id' => $entity->uuid(),
+        'id' => $entity->guid(),
         'load_on_demand' => true
       ];
 
@@ -180,34 +179,34 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
    * 
    * example:
    */
-  public function getExpandedTreePathToNode( $uuid ) {
-    $startingUuid = '';
+  public function getExpandedTreePathToNode( $guid ) {
+    $startingGuid = '';
     $expandedTreePathAsArray = [];
-    if ( !$this->IsNullOrEmptyString( $uuid ) ) {
-      $startingUuid = $uuid;
+    if ( !$this->IsNullOrEmptyString( $guid ) ) {
+      $startingGuid = $guid;
     }
     else {
-      $startingUuid = NODE_TREE_NODE_ROOT_UUID;
+      $startingGuid = NODE_TREE_NODE_ROOT_guid;
     }
 
     // get the node that matches this taxon key
     //
-    // there should be only one node for a given uuid, so the array $nodes should have one element only
+    // there should be only one node for a given guid, so the array $nodes should have one element only
 
     // get the parent using the reference field and its parent and so on
 
-    $startingParentUuid = '';
+    $startingParentGuid = '';
     $startingParentTaxonName = '';
     $node = null;
-    $this->getNodeFromUuid( $startingUuid, $node );
+    $this->getNodeFromGuid( $startingGuid, $node );
 
     if ($node != null ) {
-      $this->addTreeNode( $startingUuid, $node->getTitle(), $expandedTreePathAsArray );
+      $this->addTreeNode( $startingGuid, $node->getTitle(), $expandedTreePathAsArray );
 
       // if node has a parent then continue walking up the branch of the tree
-      $this->getImmediateParentInfo( $startingUuid, $startingParentTaxonName, $startingParentUuid );
-      if ( !$this->IsNullOrEmptyString($startingParentUuid ) ) {
-        $this->growExpandedTreePath( $expandedTreePathAsArray, $startingParentTaxonName, $startingParentUuid );
+      $this->getImmediateParentInfo( $startingGuid, $startingParentTaxonName, $startingParentGuid );
+      if ( !$this->IsNullOrEmptyString($startingParentGuid ) ) {
+        $this->growExpandedTreePath( $expandedTreePathAsArray, $startingParentTaxonName, $startingParentGuid );
       }
       // else node doesn't have parent so we're already at the top node and don't need to construct a container for its parent to put it in
     }
@@ -216,26 +215,26 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
     return new JsonResponse($expandedTreePathAsArray);
   }
 
-  private function growExpandedTreePath( &$pathAsArray, $name, $uuidOfCurrentNodeInPath ) {
+  private function growExpandedTreePath( &$pathAsArray, $name, $guidOfCurrentNodeInPath ) {
 
 
 
     //$pathAsArray[] = $taxonKeyOfCurrentNodeInPath;
 
-    // get the node's parent uuid and add it to the array
+    // get the node's parent guid and add it to the array
 
     $nextParentTaxonName = '';
-    $nextParentUuid = '';
-    $this->getImmediateParentInfo( $uuidOfCurrentNodeInPath, $nextParentTaxonName, $nextParentUuid );
+    $nextParentguid = '';
+    $this->getImmediateParentInfo( $guidOfCurrentNodeInPath, $nextParentTaxonName, $nextParentguid );
 
-    if ( $this->IsNullOrEmptyString(  $nextParentUuid ) ) {
+    if ( $this->IsNullOrEmptyString(  $nextParentguid ) ) {
       // stopping case for recursion
-      $this->addTreeNode( $uuidOfCurrentNodeInPath, $name, $pathAsArray );
+      $this->addTreeNode( $guidOfCurrentNodeInPath, $name, $pathAsArray );
       return; // we are at the top of the tree
     }
     else {
-      $this->addTreeNode( $uuidOfCurrentNodeInPath, $name, $pathAsArray );
-      $this->growExpandedTreePath( $pathAsArray, $nextParentTaxonName, $nextParentUuid );
+      $this->addTreeNode( $guidOfCurrentNodeInPath, $name, $pathAsArray );
+      $this->growExpandedTreePath( $pathAsArray, $nextParentTaxonName, $nextParentguid );
     }
   }
 
@@ -254,20 +253,71 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
 
   /**
    * 
-   * UUID is a taxonkey, but NOT the taxonkey field!  this has made it confusing - there is a uuid for the node and there is a taxonkey - why both?!
+   * guid is a taxonkey, but NOT the taxonkey field!  this has made it confusing - there is a guid for the node and there is a taxonkey - why both?!
    */
-  private function getNodeFromUuid( $uuid, &$node ) {
+  private function getNodeFromguid( $guid, &$node ) {
+    // https://gemini.google.com/share/07f07dfe0efe
+
+
+
+//use Drupal\Core\Entity\Query\QueryFactory;
+
+/** @var \Drupal\Core\Entity\Query\QueryFactory $entity_query */
+$entity_query = \Drupal::service('entity.query');
+
+// Build the query for nodes.
+$query = $entity_query->get('node')
+  // 1. Filter by content type (bundle). This is optional but highly recommended for performance.
+  ->condition('type', 'taxon')
+  
+  // 2. Filter by field value.
+  //    - 'parent_guid' is the machine name of your field.
+  //    - 'value' is the column name for simple fields (text, integer, boolean, etc.).
+  //    - 'Your Search Value' is the value you are trying to match.
+  
+  //->condition('field', 'Your Search Value')
+  ->condition('parent_guid', $guid)
+  
+  // 3. (Optional) Filter for published nodes.
+  ->condition('status', 1)
+  
+  // 4. (Optional) Limit the number of results.
+  ->range(0, 1) // Get only the first match
+  ;
+
+// Execute the query.
+$nids = $query->execute();
+
+// Check if any nodes were found.
+if (!empty($nids)) {
+  // Get the first Node ID (nid).
+  $nid = reset($nids); 
+  
+  // Load the full node object.
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = \Drupal\node\Entity\Node::load($nid);
+  
+  // Now you have the node object.
+  // ... your logic here ...
+} else {
+  // No node found matching the criteria.
+}
+
+
+/*
     // https://drupal.stackexchange.com/a/291869/1082
-    $node = \Drupal::service('entity.repository')->loadEntityByUuid('node', $uuid);
+    $node = \Drupal::service('entity.repository')->loadEntityByguid('node', $guid);
+    // TODO
+*/
   }
 
 
-  private function getImmediateParentInfo( $childUuid, &$parentName, &$parentUuid ) {
-    $parentUuid = '';
+  private function getImmediateParentInfo( $childguid, &$parentName, &$parentguid ) {
+    $parentguid = '';
     $parentName = '';
 
     $childNode = null;
-    $this->getNodeFromUuid( $childUuid, $childNode );
+    $this->getNodeFromguid( $childguid, $childNode );
     // should be just one node, but we get back an array to iterate through in any case
 
     // only expect one element array, because taxon key should be unique
@@ -275,8 +325,8 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
       # https://drupal.stackexchange.com/questions/144947/how-do-i-access-a-field-value-for-an-entity-e-g-node-object
 
     if ( $childNode ) {
-      $parentNodeInfoAsArray = $childNode->get('field_parent_uuid')->getValue();
-      // target_uuid isn't the uuid of the parent
+      $parentNodeInfoAsArray = $childNode->get('field_parent_guid')->getValue();
+      // target_guid isn't the guid of the parent
 
       $parentName = '';
       if ( array_key_exists( 'target_id', $parentNodeInfoAsArray[0] ) ) {
@@ -290,9 +340,9 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
           // https://drupal.stackexchange.com/a/256326/1082
           $parentNode = \Drupal\node\Entity\Node::load($parentNodeId);
 
-          // wrong! field_taxon_key is not uuid
-          //$parentUuid = $parentNode->get('field_taxon_key')->getValue()[0]['value'];
-          $parentUuid = $parentNode->uuid();
+          // wrong! field_taxon_key is not guid
+          //$parentguid = $parentNode->get('field_taxon_key')->getValue()[0]['value'];
+          $parentguid = $parentNode->guid();
 
           $parentName = $parentNode->getTitle();
         }
@@ -309,7 +359,7 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
   }
 
   // tree so far 
-  private function addTreeNode( $uuid, $name, &$tree ) {
+  private function addTreeNode( $guid, $name, &$tree ) {
     if ( count( $tree ) > 0 ) {
 
       $treePrevious = &$tree;
@@ -317,7 +367,7 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
       $tree = 
         [
           (object) [
-            'id' => $uuid,
+            'id' => $guid,
             'name' => $name,
             'is_open' => true, 
             "is_loading" => false,
@@ -329,7 +379,7 @@ $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMulti
       // brand new tree
       $tree = [
           (object) [
-            'id' => $uuid,
+            'id' => $guid,
            'name' => $name,
            'is_selected' => true,
            'is_closed' => false, 
