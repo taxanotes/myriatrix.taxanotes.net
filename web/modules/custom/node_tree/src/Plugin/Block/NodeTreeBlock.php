@@ -13,41 +13,12 @@ use Drupal\Component\DependencyInjection\ContainerInterface;
  * Provides hierarchical node_tree taxon tree block.
  *
  * @Block(
- *  id = "node_treeTaxonTreeBlock",
+ *  id = "NodeTreeBlock",
  *  admin_label = @Translation("node_tree hierarchical taxon tree"),
  * )
  */
-class node_treeTaxonTreeBlock extends BlockBase implements ContainerFactoryPluginInterface {
+class NodeTreeBlock extends BlockBase {
 
-protected NodeTreeController $contentController;
-
-// In MyContentBlock.php
-  /** 
-   *
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      // Method 'Drupal\node_tree\Plugin\Block\node_treeTaxonTreeBlock::create()' is not compatible with method 'Drupal\Core\Plugin\ContainerFactoryPluginInterface::create()'.intelephense(P1038)
-      // REALLY?!
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('node_tree.NodeTreeController')
-    );
-  }
-
-// In MyContentBlock.php
-// The type-hint for the fourth argument is crucial for telling PHP
-// what kind of object is expected.
-public function __construct(array $configuration, $plugin_id, $plugin_definition, NodeTreeController $content_controller) {
-  // 1. Call the parent constructor first (standard practice for plugins).
-  parent::__construct($configuration, $plugin_id, $plugin_definition);
-
-  // 2. Assign the controller object that was passed in to the
-  //    protected property $this->contentController.
-  $this->contentController = $content_controller;
-}
 
 
   /**
@@ -71,12 +42,13 @@ public function __construct(array $configuration, $plugin_id, $plugin_definition
 
     $renderable = [
       '#theme' => 'node-tree-hierarchy-tree-block',
+      '#title' => $this->t('Hierarchy'),
+      '#items' => [],
       '#attached' => array(
         'library' => array(
-          'node_tree/node_treetree',
+          'node_tree/node_tree',
         ),
       ),
-      '#taxanotesoutput' => $taxanotesoutput,
     ];
 
 
