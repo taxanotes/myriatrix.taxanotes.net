@@ -3,6 +3,10 @@
 namespace Drupal\node_tree\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\node_tree\Controller\NodeTreeController;
+use Drupal\Component\DependencyInjection\ContainerInterface;
+/* web/core/lib/Drupal/Core/Plugin/ContainerFactoryPluginInterface.php */
 
 
 /**
@@ -13,7 +17,41 @@ use Drupal\Core\Block\BlockBase;
  *  admin_label = @Translation("node_tree hierarchical taxon tree"),
  * )
  */
-class node_treeTaxonTreeBlock extends BlockBase {
+class node_treeTaxonTreeBlock extends BlockBase implements ContainerFactoryPluginInterface {
+
+protected NodeTreeController $contentController;
+
+// In MyContentBlock.php
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  // 1. Manually instantiate the controller class.
+  // The controller_resolver is used because controllers aren't registered
+  // as standard services. It returns an array: [object, method_name].
+  $controller = $container->get('controller_resolver')->getControllerFromDefinition(
+    '\Drupal\my_custom_module\Controller\MyContentController::blockContent'
+  );
+
+  return new static(
+    $configuration,
+    $plugin_id,
+    $plugin_definition,
+    // 2. Pass the controller object (the first element of the array)
+    //    as the fourth argument to the __construct method.
+    $controller[0]
+  );
+}
+
+// In MyContentBlock.php
+// The type-hint for the fourth argument is crucial for telling PHP
+// what kind of object is expected.
+public function __construct(array $configuration, $plugin_id, $plugin_definition, NodeTreeController $content_controller) {
+  // 1. Call the parent constructor first (standard practice for plugins).
+  parent::__construct($configuration, $plugin_id, $plugin_definition);
+
+  // 2. Assign the controller object that was passed in to the
+  //    protected property $this->contentController.
+  $this->contentController = $content_controller;
+}
+
 
   /**
    * {@inheritdoc}
@@ -29,7 +67,7 @@ class node_treeTaxonTreeBlock extends BlockBase {
   public function build() {
     // https://www.drupal.org/docs/8/creating-custom-modules/creating-custom-blocks/create-a-custom-block#s-note-using-twig-templates-with-custom-blocks
 
-    $node_treeoutput = '';
+    $taxanotesoutput = '';
 
     $renderable = [
       '#theme' => 'node-tree-hierarchy-tree-block',
@@ -38,6 +76,7 @@ class node_treeTaxonTreeBlock extends BlockBase {
           'node_tree/node_treetree',
         ),
       ),
+      '#taxanotesoutput' => $taxanotesoutput,
     ];
 
 
