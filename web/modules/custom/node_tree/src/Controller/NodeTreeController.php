@@ -72,6 +72,15 @@ class NodeTreeController extends ControllerBase
   // https://taxanotes.ddev.site/node_tree/api/getImmediateChildrenOfParent/?node=<value>
   // very subtle /?node= works but not ?node= without the preceding slash
   //public function getImmediatechildrenOfParent() {
+
+  /**
+   * 
+   * example:
+   * 
+   * input:
+   * 
+   * output: 
+   */
   public function getImmediatechildrenOfParent($aNode)
   {
 
