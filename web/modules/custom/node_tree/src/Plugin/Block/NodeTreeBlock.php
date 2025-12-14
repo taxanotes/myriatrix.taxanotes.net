@@ -22,23 +22,20 @@ class node_treeTaxonTreeBlock extends BlockBase implements ContainerFactoryPlugi
 protected NodeTreeController $contentController;
 
 // In MyContentBlock.php
+  /** 
+   *
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-  // 1. Manually instantiate the controller class.
-  // The controller_resolver is used because controllers aren't registered
-  // as standard services. It returns an array: [object, method_name].
-  $controller = $container->get('controller_resolver')->getControllerFromDefinition(
-    '\Drupal\my_custom_module\Controller\MyContentController::blockContent'
-  );
-
-  return new static(
-    $configuration,
-    $plugin_id,
-    $plugin_definition,
-    // 2. Pass the controller object (the first element of the array)
-    //    as the fourth argument to the __construct method.
-    $controller[0]
-  );
-}
+    return new static(
+      // Method 'Drupal\node_tree\Plugin\Block\node_treeTaxonTreeBlock::create()' is not compatible with method 'Drupal\Core\Plugin\ContainerFactoryPluginInterface::create()'.intelephense(P1038)
+      // REALLY?!
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('node_tree.NodeTreeController')
+    );
+  }
 
 // In MyContentBlock.php
 // The type-hint for the fourth argument is crucial for telling PHP
@@ -68,6 +65,9 @@ public function __construct(array $configuration, $plugin_id, $plugin_definition
     // https://www.drupal.org/docs/8/creating-custom-modules/creating-custom-blocks/create-a-custom-block#s-note-using-twig-templates-with-custom-blocks
 
     $taxanotesoutput = '';
+
+// $render_array = $this->contentController->blockContent();
+
 
     $renderable = [
       '#theme' => 'node-tree-hierarchy-tree-block',
@@ -116,7 +116,22 @@ public function __construct(array $configuration, $plugin_id, $plugin_definition
     return $renderable;
   }
 
+/**
+   * {@inheritdoc}
+   *
+   * By default, BlockBase implements per-user caching.
+   * If your content is truly dynamic and should not be cached, you can
+   * override getCacheMaxAge() or merge cacheability metadata from the controller.
+   */
+  public function getCacheMaxAge() {
+    // Return 0 to prevent caching for dynamic content.
+    return 0;
 
+    // Alternatively, for cacheable content:
+    // return parent::getCacheMaxAge();
+
+      // https://claude.ai/public/artifacts/812234ad-8586-4172-b0bd-62cb3f25aac4
+  }
 
   // taxon equivalent
 }
