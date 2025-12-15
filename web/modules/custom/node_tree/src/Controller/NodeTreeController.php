@@ -7,6 +7,10 @@ use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Drupal\node\Entity\Node;
+
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 //const NODE_TREE_NODE_ROOT_guid = ''; // TODO - fill value
 const NODE_TREE_NODE_ROOT_guid = 'a'; // TODO - fill value
 // but how do I deal with when I have multiple roots?
@@ -17,6 +21,24 @@ const NODE_TREE_NODE_ROOT_guid = 'a'; // TODO - fill value
  */
 class NodeTreeController extends ControllerBase
 {
+
+  protected $entityTypeManager;
+
+  // Step 3: Your __construct receives the object
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+    $this->entityTypeManager = $entity_type_manager;
+  }
+
+  // Step 1: Drupal calls create() FIRST, passing in the container
+  // Step 2: You ask the container for the service you need
+  public static function create(ContainerInterface $container) {
+    return new static(
+      // The container has all registered services
+      // It returns the actual EntityTypeManager object
+      $container->get('entity_type.manager')
+    );
+  }
+
   public function responseForImmediatechildrenOfParent()
   {
     return new JsonResponse($this->getImmediatechildrenOfParent());
@@ -81,82 +103,34 @@ class NodeTreeController extends ControllerBase
    * 
    * output: 
    */
-  public function getImmediatechildrenOfParent($aNode)
+  public function getImmediatechildrenOfParent()
   {
 
     // https://gemini.google.com/share/c1a91d550221
 
-
-
-    // 1. Get the Entity Query service.
-    $query = \Drupal::entityQuery('node');
-
-    // 2. Define the conditions:
-    //    - Filter by content type (optional but recommended for performance/scope).
-    //$query->condition('type', 'referencing_content_type');
-    $query->condition('type', 'taxon');
-
-    //    - Crucially, filter the entity reference field's target_id
-    //      to match the ID of the node being referenced.
-    $field_name = 'field_parent_guid';
-    // https://gemini.google.com/share/efb010b3e331
-    $target_nid = $aNode->id();
-    $query->condition($field_name, $target_nid);
-
-    // 3. Execute the query to get an array of NIDs (Node IDs).
-    $referencing_nids = $query->execute();
-
-    // 4. Load the full node objects (optional, but often needed).
-    $referencing_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($referencing_nids);
-
-    // $referencing_nodes now contains all the nodes that reference the target node.
-
-
-    foreach ($referencing_nodes as $nid => $node) {
-      $guid = $node->get('field_guid')->getValue();
-      $childObj = (object) [
-        'name' => $node->label(),
-        'id' => $guid,
-        //'id' => $node->guid(),
-        'load_on_demand' => true
-      ];
-
-      $child_node_ids_array[] = $childObj;
-    }
-
-
-
-    //https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21EntityReferenceFieldItemList.php/function/EntityReferenceFieldItemList%3A%3AreferencedEntities/11.x
-
-    //$anArray = $aNode->get('')->referencedEntities();
-
-
-
-    // parent node_tree node id
-    //$parent_guid = $aNode->id();
-    // as per spec: https://mbraak.github.io/jqTree/examples/05_load_on_demand/
-
-
-    /*
     $query = \Drupal::request()->query;
+
+        $query = \Drupal::request()->query;
+
     $parent_guid = $query->get('node');
+
 
     $child_node_ids_array = [];
     if ( !$this->IsNullOrEmptyString( $parent_guid ) ) {
+      // https://drupal.stackexchange.com/a/298084/1082
 
 
-  
       // https://drupal.stackexchange.com/a/280924/1082
 
-      $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties([
-       'type' => 'node_tree',
+      $nodes = $this->entityTypeManager->getStorage('node')->loadByProperties([
+       'type' => 'taxon',
        'field_parent_guid' => $parent_guid,
       ]);
 
       foreach ($nodes as $nid => $node) {
         $childObj = (object) [
           'name' => $node->label(),
-          'id' => $node->guid(),
+          'id' => $node->uuid(),
           'load_on_demand' => true
         ];
         
@@ -165,7 +139,7 @@ class NodeTreeController extends ControllerBase
     }
     else {
 
-      // the if-then needs to decide if a node guid has been passed in or not, and if not, set one, as in the top level parent
+      // the if-then needs to decide if a node uuid has been passed in or not, and if not, set one, as in the top level parent
       // then feed this into a query that gets the children
       //
       // might want to use IsNullOrEmptyString
@@ -174,20 +148,19 @@ class NodeTreeController extends ControllerBase
       $entity = null;
       $rootTaxonKey = NODE_TREE_NODE_ROOT_guid;
 
-      $this->getNodeFromguid( $rootTaxonKey, $entity );
+      $this->getNodeFromGuid( $rootTaxonKey, $entity );
 
-      //$entity = \Drupal::service('entity.repository')->loadEntityByguid('node', node_tree_NODE_ROOT_guid);
+      //$entity = \Drupal::service('entity.repository')->loadEntityByUuid('node', BOL_NODE_ROOT_UUID);
       $name = $entity->getTitle();
       $childObj = (object) [
         'name' => $name,
-        'id' => $entity->guid(),
+        'id' => $entity->get('field_guid'),
         'load_on_demand' => true
       ];
 
       $child_node_ids_array[] = $childObj;
     }
-    */
-
+    
     return $child_node_ids_array;
   }
 
@@ -281,32 +254,15 @@ class NodeTreeController extends ControllerBase
 
 //use Drupal\Core\Entity\Query\QueryFactory;
 
-    /** @var \Drupal\Core\Entity\Query\QueryFactory $entity_query */
-    $entity_query = \Drupal::service('entity.query');
-
-    // Build the query for nodes.
-    $query = $entity_query->get('node')
-      // 1. Filter by content type (bundle). This is optional but highly recommended for performance.
-      ->condition('type', 'taxon')
-
-      // 2. Filter by field value.
-      //    - 'parent_guid' is the machine name of your field.
-      //    - 'value' is the column name for simple fields (text, integer, boolean, etc.).
-      //    - 'Your Search Value' is the value you are trying to match.
-
-      //->condition('field', 'Your Search Value')
-      ->condition('parent_guid', $guid)
-
-      // 3. (Optional) Filter for published nodes.
-      ->condition('status', 1)
-
-      // 4. (Optional) Limit the number of results.
-      ->range(0, 1) // Get only the first match
-    ;
-
-    // Execute the query.
-    $nids = $query->execute();
-
+$query = $this->entityTypeManager->getStorage('node')->getQuery();
+$nids = $query
+  ->condition('type', 'taxon')
+  ->condition('field_parent_guid.value', $guid)  // Add '.value' for the column
+  ->condition('status', 1)
+  ->range(0, 1)
+  ->accessCheck(TRUE)  // Don't forget this!
+  ->execute();
+  
     // Check if any nodes were found.
     if (!empty($nids)) {
       // Get the first Node ID (nid).
