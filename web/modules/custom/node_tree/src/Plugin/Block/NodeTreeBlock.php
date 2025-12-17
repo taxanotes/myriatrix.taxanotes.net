@@ -12,23 +12,31 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  * Provides a nodetreeblock block.
  */
 #[Block(
-  id: 'node_tree_nodetreeblock',
+  id: 'block-node-tree-hierarchicaltaxontree',
   admin_label: new TranslatableMarkup('NodeTreeBlock'),
   category: new TranslatableMarkup('Custom'),
 )]
-final class NodeTreeBlock extends BlockBase {
+final class NodeTreeBlock extends BlockBase
+{
 
   /**
    * {@inheritdoc}
    */
-  public function build(): array {
+  public function build(): array
+  {
     /*
     $build['content'] = [
       '#markup' => $this->t('It works!'),
     ];
     */
     return [
-      '#theme' => 'node_tree_nodetreeblock',
+      '#id' => 'abc',
+      '#theme' => 'node-tree-hierarchy-tree-block',
+      '#attached' => array(
+        'library' => array(
+          'node_tree/node_tree',
+        ),
+      ),
       '#data' => [
         'title' => $this->t('Hierarchy'),
       ],
@@ -37,5 +45,4 @@ final class NodeTreeBlock extends BlockBase {
       ],
     ];
   }
-
 }

@@ -5,6 +5,7 @@
  */
 function node_tree_theme($existing, $type, $theme, $path)
 {
+  /*
   return [
     'node_tree_nodetreeblock' => [
       'variables' => [
@@ -13,8 +14,20 @@ function node_tree_theme($existing, $type, $theme, $path)
       'template' => 'node-tree-hierarchy-tree-block',
     ],
   ];
+  */
+
+  return [
+    'bol-hierarchy-tree-block' => [],
+  ];
 }
 
+
+function node_tree_preprocess_block(&$variables)
+{
+  if ($variables['configuration']['label'] == "NodeTreeBlock") {
+    $variables['attributes']['id'] = ['node_tree'];
+  }
+}
 
 
 //  https://drupal.stackexchange.com/a/200609/1082

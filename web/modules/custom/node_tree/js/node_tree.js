@@ -1,83 +1,80 @@
 (function ($, Drupal) {
-    Drupal.behaviors.node_tree = {
-      attach: function (context, settings) {
+  /*
+  Drupal.behaviors.node_tree = {
+    attach: function (context, settings) {
       // expecting to remove this if testing confirms everything still works
     }
   };
+  */
 
-  // data-portal/node/12345
+  // taxonomy-tree/node/12345
   Drupal.behaviors.node_tree_open_tree_at = {
     attach: function (context, settings) {
+
       var nodeId = getNodeIdFromUrl();
 
-      if ( nodeId !== undefined ) {
-        var newdiv2 =  $(document.createElement('div')).attr('id', 'node_treetreeloading');
+      if (nodeId !== undefined) {
+
         newdiv2.text('Loading tree expanded to selected taxon...');
-        $('#block-node_treehierarchicaltaxontree-2').append(newdiv2);
-        $.get('/node_tree/api/getExpandedTreePathToNode/' + nodeId, getExpandedTreePathToNodeCallback );
+        $('#node_tree').append(newdiv2);
+        $.get('/node_tree/api/getExpandedTreePathToNode/' + nodeId, getExpandedTreePathToNodeCallback);
       }
       else {
-        var newdiv2 =  $(document.createElement('div')).attr('id', 'node_treetree');
-        newdiv2.attr('data-url', '/node_tree/api/getImmediateChildrenOfParentnode_tree/');
-        $('#block-node_treehierarchicaltaxontree-2').append(newdiv2);
-          
-        var node_treetree = $('#node_treetree').tree({
+        var newdiv2 = $(document.createElement('div')).attr('id', 'id_node_tree');
+        newdiv2.attr('data-url', '/node_tree/api/getImmediateChildrenOfParent/');
+        $('#node_tree').append(newdiv2);
+
+        var id_node_tree = $('#node_tree').tree({
         });
-      
-        node_treeTreeEvents( node_treetree );
+
+        id_node_treeEvents(id_node_tree);
       }
     }
   };
 
-  var getImmediateChildrenOfParentnode_treeCallback = function(response) {
-
-  }
-
-
-  // e.g. species name https://taxanotes.ddev.site/data-portal/node/guid
+  // e.g. species name https://taxanotes.ddev.site/taxonomy-tree/node/guid
   // guid
 
   /**
    * 
    * @param {*} response 
    */
-  var getExpandedTreePathToNodeCallback = function(response) {
+  var getExpandedTreePathToNodeCallback = function (response) {
     // https://github.com/mbraak/jqTree/issues/301#issuecomment-133307420
-    $('#node_treetreeloading').remove();
 
-    var newdiv2 =  $(document.createElement('div')).attr('id', 'node_treetree');
-    newdiv2.attr('data-url', '/node_tree/api/getImmediateChildrenOfParentnode_tree/');
-    $('#block-node_treehierarchicaltaxontree-2').append(newdiv2);
+    var newdiv2 = $(document.createElement('div')).attr('id', 'id_node_tree');
+    newdiv2.attr('data-url', '/node_tree/api/getImmediateChildrenOfParent/');
+    $('#id_node_tree').append(newdiv2);
 
-    //$('#node_treetree').attr('data-url', '/node_tree/api/getImmediateChildrenOfParentnode_tree/');
+    //$('#id_node_tree').attr('data-url', '/node_tree/api/getImmediateChildrenOfParentnode_tree/');
 
-    var node_treetree = $('#node_treetree').tree({
+    var id_node_tree = $('#id_node_tree').tree({
       data: response,
       autoOpen: true,
       saveState: true,
     });
 
-    node_treeTreeEvents( node_treetree );
+    id_node_treeEvents(id_node_tree);
 
-    $( "<div id='reloadtreemessage'><p>Permalink view. <a href='/data-portal'>click here</a> to re-explore tree</p><div>" ).insertAfter( "#block-node_treehierarchicaltaxontree-2" );
+    $("<div id='reloadtreemessage'><p>Permalink view. <a href='/taxonomy-tree'>click here</a> to re-explore tree</p><div>").insertAfter("#id_node_tree");
   }
 
 
   /**
    * 
-   * @param {*} node_treetree 
+   * @param {*} id_node_tree 
    */
-  var node_treeTreeEvents = function( node_treetree ) {
-    node_treetree.on(
+  var id_node_treeEvents = function (id_node_tree) {
+    id_node_tree.on(
       'tree.select',
-      function(event) {
+      function (event) {
         if (event.node) {
           // https://mbraak.github.io/jqTree/#event-tree-select
 
           // change browser address bar URL to link directly to the node, for saving in bookmarks, history, sharing
           // https://stackoverflow.com/a/3503206/227926
           var node = event.node;
-          window.history.pushState('permalink-to-' + node.id, node.name, '/data-portal/node/' + node.id );
+          window.history.pushState('permalink-to-' + node.id, node.name, '/taxonomy-tree/node/' + node.id);
 
           // https://mbraak.github.io/jqTree/#functions-loaddata
           //
@@ -86,20 +83,22 @@
 
           // get the node_tree node content for display on the right hand side
 
-          $.get('/node_tree/api/getnode_treeContent/' + node.id, node_treeContentCallback);  
-            
+          $.get('/node_tree/api/getNodeTreeContent/' + node.id, node_treeContentCallback);
+
           taxon = node.name; // node.name is the node title field
 
-          if ( taxon !== '' ) {
+          if (taxon !== '') {
             var params = {
               'taxon': taxon,
             }
 
-            console.log( '[' + taxon + ']' );
+            console.log('[' + taxon + ']');
 
+            /*
             $.get('/node_tree/api/noticeProgressnode_treeata', callbackNoticeProgressnode_treeata );
 
             $.get('/node_tree/externalapi', params, getnode_treeataCallback);  // TO DO  - to remove 
+            */
           }
           else {
             // event.node is null
@@ -120,37 +119,22 @@
    * 
    * @param {*} response 
    */
-  var node_treeContentCallback = function(response) {
+  var node_treeContentCallback = function (response) {
     console.log(response);
     // Replaces #node_treecontentdisplay with article - #node_treecontentdisplay doesn't exist?? 
 
     $('.node_treecontentdisplay').html(response.data);
-  }    
+  }
+
 
   /**
    * 
    * @param {*} response 
    */
-  var getnode_treeataCallback = function(response) {
-    if ( Object.keys(response.data).length > 0 ) {
-
-      console.dir(response.data);
-
-      console.dir( Object.keys(response.data).length );
-
-      // just relay the response.data content onto the next api call, no need to package or format
-      $.post( '/node_tree/api/getnode_treeataOutput', response.data, getnode_treeataDisplayCallback, 'text' );
-    }
-  }   
-
-  /**
-   * 
-   * @param {*} response 
-   */
-  var getnode_treeataDisplayCallback  = function(response) {
+  var getnode_treeataDisplayCallback = function (response) {
     //console.log(response);
 
-    var responseAsObject = JSON.parse( response );
+    var responseAsObject = JSON.parse(response);
 
     $('.node_treeisplaycontainer').empty();
 
@@ -160,31 +144,14 @@
 
   /**
    * 
-   * @param {*} response 
-   */
-  var callbackNoticeProgressnode_treeata = function(response) {
-
-    // not required, don't know why
-    //var responseAsObject = JSON.parse( response );
-
-
-    $('.node_treeisplaycontainer').empty();
-
-    // var responseAsObject = response.html;
-    $('.node_treeisplaycontainer').html(response.html);
-  }
-
-
-  /**
-   * 
    * @returns 
    */
-  var getNodeIdFromUrl = function() {
+  var getNodeIdFromUrl = function () {
     var path = window.location.pathname;
-  
+
     // [A-Z0-9]
     // var regexForDataPortalPath = /\/data\-portal\/node\/\d+/m;
-    var regexForDataPortalPath = /\/data\-portal\/node\/[A-Z0-9]+/m;
+    var regexForDataPortalPath = /\/taxonomy\-tree\/node\/[A-Z0-9]+/m;
 
     var nodeUrlFrags = path.match(regexForDataPortalPath);
 
@@ -194,5 +161,5 @@
 
     return nodeId;
   }
-    
+
 })(jQuery, Drupal);
