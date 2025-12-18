@@ -19,3 +19,6 @@ Failed to start myriatrix-dev: unable to start project myriatrix-dev because the
 
  ddev seems to use local php so had to brew install 8.3 and unlink 8.1
  
+
+why is my js not loading, from a Drupal 11 module
+ https://claude.ai/share/bb8eb06f-fee8-4943-8d77-f51394712068

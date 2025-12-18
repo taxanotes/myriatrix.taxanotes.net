@@ -24,7 +24,7 @@
         newdiv2.attr('data-url', '/node_tree/api/getImmediateChildrenOfParent/');
         $('#node_tree').append(newdiv2);
 
-        var id_node_tree = $('#node_tree').tree({
+        var id_node_tree = $('#id_node_tree').tree({
         });
 
         id_node_treeEvents(id_node_tree);
