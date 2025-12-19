@@ -63,7 +63,7 @@ class NodeTreeController extends ControllerBase
     } else {
       $guidToUse = NODE_TREE_NODE_ROOT_guid;
     }
-    $this->getNodeFromguid($guidToUse, $node);
+    $this->getChildNodeFromguid($guidToUse, $node);
 
     // https://drupal.stackexchange.com/a/194368/1082
     // and
@@ -148,13 +148,27 @@ class NodeTreeController extends ControllerBase
       $entity = null;
       $rootTaxonKey = NODE_TREE_NODE_ROOT_guid;
 
-      $this->getNodeFromGuid( $rootTaxonKey, $entity );
+      // this should really be - get all nodes without a parent - i.e. the top level, as we may start with multiple nodes at the top level
+
+      $this->getChildNodeFromguid( $rootTaxonKey, $entity );
 
       //$entity = \Drupal::service('entity.repository')->loadEntityByUuid('node', BOL_NODE_ROOT_UUID);
+      /*
       $name = $entity->getTitle();
       $childObj = (object) [
         'name' => $name,
         'id' => $entity->get('field_guid'),
+        'load_on_demand' => true
+      ];
+      */
+
+      $node = null;
+      $parent_guid = $rootTaxonKey;
+      $this->getNodeFromGuid($parent_guid, $node);
+
+      $childObj = (object) [
+        'name' => $node->label(),
+        'id' => $parent_guid,
         'load_on_demand' => true
       ];
 
@@ -188,7 +202,7 @@ class NodeTreeController extends ControllerBase
     $startingParentGuid = '';
     $startingParentTaxonName = '';
     $node = null;
-    $this->getNodeFromGuid($startingGuid, $node);
+    $this->getChildNodeFromguid($startingGuid, $node);
 
     if ($node != null) {
       $this->addTreeNode($startingGuid, $node->getTitle(), $expandedTreePathAsArray);
@@ -228,17 +242,49 @@ class NodeTreeController extends ControllerBase
     }
   }
 
-  private function getNodeFromTaxonKey($taxonkey, &$node)
+  private function getNodeFromGuid($guid, &$node)
   {
+    /*
     $nodeQueryAsArray = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties([
       'type' => 'node_tree',
-      'field_taxon_key' => $taxonkey,
+      'field_guid' => $guid,
     ]);
+    */
+
+
+    $query = $this->entityTypeManager->getStorage('node')->getQuery();
+
+    $nodeQueryAsArray = $query
+  ->condition('type', 'taxon')
+  ->condition('field_guid.value', $guid)  // Add '.value' for the column
+  ->condition('status', 1)
+  ->range(0, 1)
+  ->accessCheck(TRUE)  // Don't forget this!
+  ->execute();
+  
+      // Check if any nodes were found.
+    if (!empty($nodeQueryAsArray)) {
+      // Get the first Node ID (nid).
+      $nid = reset($nodeQueryAsArray); 
+  
+  // Load the full node object.
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal\node\Entity\Node::load($nid);
+
+      // Now you have the node object.
+      // ... your logic here ...
+    } else {
+      // No node found matching the criteria.
+    }
+
 
     // only expect one element array, because taxon key should be unique
+    /*
     foreach ($nodeQueryAsArray as $nid => $aNode) {
       $node = $aNode;
     }
+*/
+
   }
 
 
@@ -246,7 +292,7 @@ class NodeTreeController extends ControllerBase
    * 
    * guid is a taxonkey, but NOT the taxonkey field!  this has made it confusing - there is a guid for the node and there is a taxonkey - why both?!
    */
-  private function getNodeFromguid($guid, &$node)
+  private function getChildNodeFromguid($guid, &$node)
   {
     // https://gemini.google.com/share/07f07dfe0efe
 
@@ -293,7 +339,7 @@ $nids = $query
     $parentName = '';
 
     $childNode = null;
-    $this->getNodeFromguid($childguid, $childNode);
+    $this->getChildNodeFromguid($childguid, $childNode);
     // should be just one node, but we get back an array to iterate through in any case
 
     // only expect one element array, because taxon key should be unique
