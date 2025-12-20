@@ -189,6 +189,9 @@ $child_node_ids_array = $query
   */
 
   // below was generated with help of: https://gemini.google.com/share/75697eb801d6
+
+
+  /*
 $database = \Drupal::database();
 $query = $database->select('node_field_data', 'nfd');
 
@@ -204,6 +207,45 @@ $query->fields('nfd', ['title']);
 $query->isNull('f.field_parent_taxon_reference_target_id');
 
 $child_node_ids_array = $query->execute()->fetchCol();
+*/
+
+
+
+
+$database = \Drupal::database();
+$query = $database->select('node_field_data', 'nfd');
+
+// Join the field table
+$query->leftJoin('node__field_parent_taxon_reference', 'f', 'f.entity_id = nfd.nid');
+
+$query->condition('type', 'taxon');
+
+// Select the real columns
+/*
+$query->fields('nfd', ['nid', 'title']);
+*/
+// Select 'nid' normally, and rename 'title' to 'name'
+$query->addField('nfd', 'title', 'name');
+$query->addField('nfd', 'nid', 'nid');
+
+/*
+$query->fields('nfd', [
+  'nid' => 'nid',
+  'name' => 'title', 
+]);
+*/
+
+// Add a "dummy" or fixed expression that is always true (1)
+// We alias it as 'is_empty_reference'
+$query->addExpression('1', 'load_on_demand');
+
+// Filter for empty/unset entity reference
+$query->isNull('f.field_parent_taxon_reference_target_id');
+
+// Execute and fetch as objects
+$child_node_ids_array = $query->execute()->fetchAll();
+
+// nearly working: https://gemini.google.com/share/390755d74a24 but parents are repeatedly output
 
 
 
