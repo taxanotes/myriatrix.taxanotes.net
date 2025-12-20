@@ -139,6 +139,8 @@ class NodeTreeController extends ControllerBase
     }
     else {
 
+     /*
+
       // the if-then needs to decide if a node uuid has been passed in or not, and if not, set one, as in the top level parent
       // then feed this into a query that gets the children
       //
@@ -152,16 +154,6 @@ class NodeTreeController extends ControllerBase
 
       $this->getChildNodeFromguid( $rootTaxonKey, $entity );
 
-      //$entity = \Drupal::service('entity.repository')->loadEntityByUuid('node', BOL_NODE_ROOT_UUID);
-      /*
-      $name = $entity->getTitle();
-      $childObj = (object) [
-        'name' => $name,
-        'id' => $entity->get('field_guid'),
-        'load_on_demand' => true
-      ];
-      */
-
       $node = null;
       $parent_guid = $rootTaxonKey;
       $this->getNodeFromGuid($parent_guid, $node);
@@ -173,9 +165,62 @@ class NodeTreeController extends ControllerBase
       ];
 
       $child_node_ids_array[] = $childObj;
+
+      */
+
+/*
+
+// 1. Get the node storage.
+$query = \Drupal::entityTypeManager()->getStorage('node')->getQuery();
+
+// 2. Add an OR condition group.
+// We want to find nodes where the field is NULL OR it is an empty string.
+$or_group = $query->orConditionGroup()
+  ->notExists('field_parent_guid')      // Field is empty/never saved
+  ->condition('field_parent_guid', ''); // Field exists but is an empty string
+
+// 3. Apply the conditions and execute.
+$child_node_ids_array = $query
+  ->condition('type', 'taxon')
+  ->accessCheck(FALSE) // Use TRUE if you want to respect the current user's permissions
+  ->condition($or_group)
+  ->execute();
+
+  */
+
+  // below was generated with help of: https://gemini.google.com/share/75697eb801d6
+$database = \Drupal::database();
+$query = $database->select('node_field_data', 'nfd');
+
+// Join the entity reference field table
+// Replace 'field_your_reference' with your actual field machine name
+$query->leftJoin('node__field_parent_taxon_reference', 'f', 'f.entity_id = nfd.nid');
+
+$query->condition('type', 'taxon');
+
+$query->fields('nfd', ['title']);
+
+// Find where the reference is missing (NULL)
+$query->isNull('f.field_parent_taxon_reference_target_id');
+
+$child_node_ids_array = $query->execute()->fetchCol();
+
+
+
     }
     
     return $child_node_ids_array;
+
+
+          //$entity = \Drupal::service('entity.repository')->loadEntityByUuid('node', BOL_NODE_ROOT_UUID);
+      /*
+      $name = $entity->getTitle();
+      $childObj = (object) [
+        'name' => $name,
+        'id' => $entity->get('field_guid'),
+        'load_on_demand' => true
+      ];
+      */
   }
 
   /**
