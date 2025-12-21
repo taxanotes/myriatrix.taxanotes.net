@@ -133,8 +133,8 @@ class NodeTreeController extends ControllerBase
       foreach ($nodes as $nid => $node) {
         $childObj = (object) [
           'name' => $node->label(),
-         // 'id' => $node->get('field_guid'),
-                    'id' => $node->uuid(),
+          'id' => $node->get('field_guid')->getValue()[0]['value'],
+              //      'id' => $node->uuid(),
           'load_on_demand' => true
         ];
         

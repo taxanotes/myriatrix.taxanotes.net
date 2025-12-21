@@ -25,3 +25,8 @@ ddev drush migrate:rollback myriatrix
 ddev drush migrate:import myriatrixtest
 ddev drush migrate:reset-status myriatrixtest
 ddev drush migrate:rollback myriatrixtest
+
+
+also ddev drush node_treelnk to link nodes in the tree 
+
+and to debug drush commands do: ddev drush node_treelnk --xdebug for example
