@@ -62,6 +62,7 @@ class NodeTreeCommands extends DrushCommands {
     // if I'm going through all of them programmatically, 
     //I don't need to deal with pages 
     //$view->setItemsPerPage(1000);
+    $view->setItemsPerPage(0);
     $view->setOffset(0);
 
     $view->execute();

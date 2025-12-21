@@ -30,3 +30,5 @@ ddev drush migrate:rollback myriatrixtest
 also ddev drush node_treelnk to link nodes in the tree 
 
 and to debug drush commands do: ddev drush node_treelnk --xdebug for example
+
+There are three roots (top parents) in Myriatrix: Myriapoda, Onychophora, and "Deleted taxa" or something like that.
