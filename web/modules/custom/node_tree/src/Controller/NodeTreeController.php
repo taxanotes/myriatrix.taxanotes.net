@@ -122,6 +122,9 @@ class NodeTreeController extends ControllerBase
 
       // https://drupal.stackexchange.com/a/280924/1082
 
+      // this needs rewriting like the "else" 
+      //   - change it to not rely on the field_parent_guid, use the entity relationship field instead
+      //   - dont have a for-loop - not efficient
       $nodes = $this->entityTypeManager->getStorage('node')->loadByProperties([
        'type' => 'taxon',
        'field_parent_guid' => $parent_guid,
@@ -130,7 +133,8 @@ class NodeTreeController extends ControllerBase
       foreach ($nodes as $nid => $node) {
         $childObj = (object) [
           'name' => $node->label(),
-          'id' => $node->get('field_guid'),
+         // 'id' => $node->get('field_guid'),
+                    'id' => $node->uuid(),
           'load_on_demand' => true
         ];
         
@@ -217,6 +221,7 @@ $query = $database->select('node_field_data', 'nfd');
 
 // Join the field table
 $query->leftJoin('node__field_parent_taxon_reference', 'f', 'f.entity_id = nfd.nid');
+$query->leftJoin('node__field_guid', 'f_guid', 'f_guid.entity_id = nfd.nid');
 
 $query->condition('type', 'taxon');
 
@@ -226,7 +231,8 @@ $query->fields('nfd', ['nid', 'title']);
 */
 // Select 'nid' normally, and rename 'title' to 'name'
 $query->addField('nfd', 'title', 'name');
-$query->addField('nfd', 'nid', 'nid');
+//$query->addField('nfd', 'nid', 'nid');
+$query->addField('f_guid', 'field_guid_value', 'id');
 
 /*
 $query->fields('nfd', [
@@ -237,7 +243,7 @@ $query->fields('nfd', [
 
 // Add a "dummy" or fixed expression that is always true (1)
 // We alias it as 'is_empty_reference'
-$query->addExpression('1', 'load_on_demand');
+$query->addExpression(true, 'load_on_demand');
 
 // Filter for empty/unset entity reference
 $query->isNull('f.field_parent_taxon_reference_target_id');
@@ -246,7 +252,11 @@ $query->isNull('f.field_parent_taxon_reference_target_id');
 $child_node_ids_array = $query->execute()->fetchAll();
 
 // nearly working: https://gemini.google.com/share/390755d74a24 but parents are repeatedly output
+// UPDATE - now working https://gemini.google.com/share/b338f54f8898
 
+// Title (label) 
+// GUID - field_guid
+// Parent GUID - field_parent_guid <-- dont use this, use field_parent_taxon_reference instead
 
 
     }
