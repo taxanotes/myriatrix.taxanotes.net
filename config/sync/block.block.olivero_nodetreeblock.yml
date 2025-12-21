@@ -1,0 +1,20 @@
+uuid: c37a41c7-06a9-4092-b58f-1f1927172431
+langcode: en
+status: true
+dependencies:
+  module:
+    - node_tree
+  theme:
+    - olivero
+id: olivero_nodetreeblock
+theme: olivero
+region: content
+weight: 0
+provider: null
+plugin: block-node-tree-hierarchicaltaxontree
+settings:
+  id: block-node-tree-hierarchicaltaxontree
+  label: NodeTreeBlock
+  label_display: visible
+  provider: node_tree
+visibility: {  }

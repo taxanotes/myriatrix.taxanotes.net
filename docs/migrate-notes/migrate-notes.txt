@@ -14,3 +14,14 @@ ddev drush migrate:import myriatrix
 
 ddev drush migrate:rollback myriatrix
 - where "myriatrix" is the `id:` in: config/sync/migrate_plus.migration.myriatrix.yml
+
+
+also:
+
+ddev drush migrate:reset-status myriatrix
+ddev drush migrate:rollback myriatrix
+
+
+ddev drush migrate:import myriatrixtest
+ddev drush migrate:reset-status myriatrixtest
+ddev drush migrate:rollback myriatrixtest
